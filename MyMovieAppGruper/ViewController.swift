@@ -7,6 +7,13 @@
 
 import UIKit
 
+
+struct Movie: Codable{
+    var titles: String
+}
+
+
+
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     let movieNames = [String]()
     @IBOutlet weak var tableViewOutlet: UITableView!
@@ -14,18 +21,19 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     @IBOutlet weak var errorLabelOutlet: UILabel!
     @IBOutlet weak var textFieldOutlet: UITextField!
     override func viewDidLoad() {
-        
         super.viewDidLoad()
+        tableViewOutlet.delegate = self
+        tableViewOutlet.dataSource = self
         // Do any additional setup after loading the view.
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return movieNames.count
+        return 3
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-      
-        
-        return UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: "myCell")!
+               cell.textLabel?.text = "Hello World!"
+               return cell
     }
     func getMovie(){
         let session = URLSession.shared
@@ -34,14 +42,18 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
        
             let dataTask = session.dataTask(with: movieURL) { data, response, error in
                     if let d = data{
-                        if let jsonObj = try? JSONSerialization.jsonObject(with: d, options: .fragmentsAllowed) as? NSDictionary {
+                        if let jsonObj = try? JSONSerialization.jsonObject(with: d, options: []) as? NSDictionary {
                             print(jsonObj)
-                            if jsonObj.value(forKey: "Error") != nil{
-                                DispatchQueue.main.async{
-                                    self.errorLabelOutlet.isHidden = false
-                                   self.errorLabelOutlet.text = "Error: Enter a valid movie title!"
-                                }
-                            }
+                            if let movieObj = try? JSONDecoder().decode(Movie.self, from: d){
+                                //print(movieObj.titles)
+                                
+                                for r in movieObj.titles{
+                                    print("Title: \(r)")
+                                                            }
+                                                   }
+                                                   else{
+                                                       print("error decoding to movie object")
+                                                   }
 //                            else{
 //                                let j = jsonObj.value(forKey: "Year")!
 //                            DispatchQueue.main.async{
